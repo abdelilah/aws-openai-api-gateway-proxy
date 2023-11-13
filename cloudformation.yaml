@@ -1,0 +1,112 @@
+Parameters:
+  OpenAIKey:
+    Type: String
+    Description: The OpenAI API key
+  QuotaLimit:
+    Type: Number
+    Description: The quota limit for the usage plan
+    Default: 1000
+  ThrottleBurstLimit:
+    Type: Number
+    Description: The burst limit for the throttle settings
+    Default: 200
+  ThrottleRateLimit:
+    Type: Number
+    Description: The rate limit for the throttle settings
+    Default: 100
+
+Resources:
+  OpenAIApiGateway:
+    Type: AWS::ApiGateway::RestApi
+    Properties:
+      Name: OpenAIApiGateway
+
+  OpenAIApiResource:
+    Type: AWS::ApiGateway::Resource
+    Properties:
+      RestApiId: !Ref OpenAIApiGateway
+      ParentId: !GetAtt OpenAIApiGateway.RootResourceId
+      PathPart: '{proxy+}'
+
+  OpenAIApiMethod:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      RestApiId: !Ref OpenAIApiGateway
+      ResourceId: !Ref OpenAIApiResource
+      HttpMethod: ANY
+      AuthorizationType: NONE
+      ApiKeyRequired: true
+      RequestParameters:
+        method.request.path.proxy: true
+      Integration:
+        Type: HTTP_PROXY
+        IntegrationHttpMethod: ANY
+        Uri: 'https://api.openai.com/v1/{proxy}'
+        PassthroughBehavior: WHEN_NO_MATCH
+        RequestParameters:
+          'integration.request.path.proxy': 'method.request.path.proxy'
+          'integration.request.header.Content-Type': "'application/json'"
+          'integration.request.header.Authorization': !Sub
+            - "'Bearer ${OpenAIKey}'"
+            - OpenAIKey: !Ref OpenAIKey
+        IntegrationResponses: 
+          - StatusCode: 200
+
+  OpenAIApiKey:
+    Type: AWS::ApiGateway::ApiKey
+    Properties:
+      Name: OpenAIApiKey
+      Description: API Key for OpenAI API Gateway
+      Enabled: true
+
+  OpenAIApiUsagePlan:
+    Type: AWS::ApiGateway::UsagePlan
+    Properties:
+      ApiStages:
+        - ApiId: !Ref OpenAIApiGateway
+          Stage: default
+      Description: Usage plan for OpenAI API Gateway
+      Quota:
+        Limit: !Ref QuotaLimit
+        Period: MONTH
+      Throttle:
+        BurstLimit: !Ref ThrottleBurstLimit
+        RateLimit: !Ref ThrottleRateLimit
+
+  OpenAIApiUsagePlanKey:
+    Type: AWS::ApiGateway::UsagePlanKey
+    Properties:
+      KeyId: !Ref OpenAIApiKey
+      KeyType: API_KEY
+      UsagePlanId: !Ref OpenAIApiUsagePlan
+
+  OpenAIApiDeployment:
+    Type: AWS::ApiGateway::Deployment
+    DependsOn: OpenAIApiMethod
+    Properties:
+      RestApiId: !Ref OpenAIApiGateway
+
+  OpenAIApiStage:
+    Type: AWS::ApiGateway::Stage
+    Properties:
+      StageName: default
+      RestApiId: !Ref OpenAIApiGateway
+      DeploymentId: !Ref OpenAIApiDeployment
+
+  OpenAIApiUsagePlan:
+    Type: AWS::ApiGateway::UsagePlan
+    Properties:
+      ApiStages:
+        - ApiId: !Ref OpenAIApiGateway
+          Stage: !Ref OpenAIApiStage
+
+Outputs:
+  OpenAIApiUrl:
+    Description: The URL for OpenAI API Gateway
+    Value: !Join 
+      - ''
+      - - 'https://'
+        - !Ref OpenAIApiGateway
+        - '.execute-api.'
+        - !Ref 'AWS::Region'
+        - '.amazonaws.com/default'
