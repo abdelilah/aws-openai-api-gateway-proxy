@@ -13,8 +13,8 @@ Setup should be straightforward, you can either use the cloudformation template 
 
 [![Launch Stack](https://s3.amazonaws.com/cloudformation-examples/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/create/review?stackName=OpenAI&templateURL=https://abdelilah-github.s3.amazonaws.com/aws-openai-api-gateway-proxy/cloudformation.yaml)
 
-### Deploying using the command line with AWS CLI
+or using the AWS CLI:
 
-```bash
+```shell
 aws cloudformation create-stack --stack-name OpenAI --template-body file://cloudformation.yaml --parameters ParameterKey=OpenAIKey,ParameterValue=YOUR_OPENAI_API_KEY
 ```
