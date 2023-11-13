@@ -11,7 +11,7 @@ This is a simple AWS API Gateway proxy for the OpenAI API. It allows you to use 
 
 Setup should be straightforward, you can either use the cloudformation template in this repo or use click the following button to open the template in the AWS console:
 
-[![Launch Stack](https://s3.amazonaws.com/cloudformation-examples/cloudformation-launch-stack.png)](https://github.com/abdelilah/aws-openai-api-gateway-proxy/blob/master/cloudformation.yaml)
+[![Launch Stack](https://s3.amazonaws.com/cloudformation-examples/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/create/review?stackName=OpenAI&templateURL=https://raw.githubusercontent.com/abdelilah/aws-openai-api-gateway-proxy/main/cloudformation.yaml)
 
 ### Deploying using the command line with AWS CLI
 
