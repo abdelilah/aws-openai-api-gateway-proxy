@@ -38,18 +38,20 @@ Resources:
       ApiKeyRequired: true
       RequestParameters:
         method.request.path.proxy: true
+        method.request.header.Content-Type: true
       Integration:
         Type: HTTP_PROXY
         IntegrationHttpMethod: ANY
-        Uri: 'https://api.openai.com/v1/{proxy}'
+        Uri: 'https://api.openai.com/{proxy}'
         PassthroughBehavior: WHEN_NO_MATCH
+        ConnectionType: INTERNET
         RequestParameters:
           'integration.request.path.proxy': 'method.request.path.proxy'
-          'integration.request.header.Content-Type': "'application/json'"
+          'integration.request.header.Content-Type': 'method.request.header.Content-Type'
           'integration.request.header.Authorization': !Sub
             - "'Bearer ${OpenAIKey}'"
             - OpenAIKey: !Ref OpenAIKey
-        IntegrationResponses: 
+        IntegrationResponses:
           - StatusCode: 200
 
   OpenAIApiKey:
